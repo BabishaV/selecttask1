@@ -1,11 +1,20 @@
+
+  
+  
+
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-interface Product {
-  title: string;
-  price: string;
-  link: string;
-  thumbnail: string;
+interface Animal {
+  name: string;
+  taxonomy: {
+    scientific_name: string;
+  };
+  locations: string[];
+  characteristics: {
+    most_distinctive_feature: string;
+    lifespan: string;
+  };
 }
 
 @Component({
@@ -14,38 +23,52 @@ interface Product {
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
+  title = 'selecttask';
   searchQuery: string = '';
-  product: Product;
-  loading: boolean = false;
-  error: string = '';
-
-  constructor(private http: HttpClient) { }
-
+  API_KEY = 'y/M9h31ykN9Jp3gMthed4A==e3PGetK9CMQqoL8h';
+  animals: Animal[] = [];
+  totalAnimalDetails: number = 0;
+  
+  showTable: boolean = false;
+  
+  
+  
+  constructor(private http: HttpClient) {}
+ 
   search() {
-    this.loading = true;
-    this.error = '';
+    if (!this.searchQuery) {
+    
+      window.alert("Enter any Animal name");
+      return;
+    }
+    
+    const url = `https://api.api-ninjas.com/v1/animals?name=${this.searchQuery}`;
+    const headers = { 'x-Api-Key': this.API_KEY };
 
-    const url = 'https://serpapi.com/search.json?engine=google_product&product_id=5898709734021221634&api_key=YOUR_API_KEY';
-
-    this.http.get<any>(url).subscribe(
-      (response) => {
-        if (response.product_results && response.product_results.length > 0) {
-          const productResult = response.product_results[0];
-          this.product = {
-            title: productResult.title,
-            price: productResult.price,
-            link: productResult.link,
-            thumbnail: productResult.thumbnail
-          };
-        } else {
-          this.product = null;
+    this.http.get<any[]>(url, { headers }).subscribe(
+      (animals) => {
+        this.animals = animals;
+        this.totalAnimalDetails = this.animals.length;
+        this.showTable = this.animals.length > 0;
+        console.log('Performing search for:', this.searchQuery);
+        if (!this.showTable) {
+          window.alert("No animals found.");
         }
-        this.loading = false;
+        
       },
       (error) => {
-        this.error = 'An error occurred while fetching the product information.';
-        this.loading = false;
+        console.error(error);
       }
+      
     );
+    
   }
 }
+
+
+
+
+
+
+
+
